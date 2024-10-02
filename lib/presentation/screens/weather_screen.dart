@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:weather_app/presentation/screens/widget_screen.dart';
+import 'package:weather_app/data/location_repository.dart';
+import 'package:weather_app/data/weather_repository.dart';
 import 'package:weather_app/resources/resources.dart';
 import 'package:weather_app/presentation/theme/colors_app.dart';
 import 'package:weather_app/presentation/theme/sizes_app.dart';
+
+import 'widget_screen.dart';
 
 class WeatherScreen extends StatefulWidget {
   const WeatherScreen({super.key});
@@ -12,6 +15,45 @@ class WeatherScreen extends StatefulWidget {
 }
 
 class _WeatherScreenState extends State<WeatherScreen> {
+  final LocationRepository _locationRepository = LocationRepository();
+  final WeatherRepository _weatherRepository = WeatherRepository();
+
+  String _city = "Загрузка...";
+  double _temperature = 0.0;
+  int _humidity = 0;
+  double _windSpeed = 0.0;
+  double _feelsLike = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLocationAndWeather();
+  }
+
+  Future<void> _loadLocationAndWeather() async {
+    try {
+      // Получение позиции
+      final position = await _locationRepository.getCurrentPosition();
+
+      // Получение названия города
+      final city = await _locationRepository.getCityFromPosition(position);
+
+      // Получение данных о погоде для этого города
+      final weatherData = await _weatherRepository.fetchWeatherData(city);
+
+      // Обновление состояния
+      setState(() {
+        _city = city;
+        _temperature = weatherData['temperature'];
+        _humidity = weatherData['humidity'];
+        _windSpeed = weatherData['windSpeed'];
+        _feelsLike = weatherData['feelsLike'];
+      });
+    } catch (e) {
+      print(e); // Логирование ошибок
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,9 +75,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
                         height: AppIconSizes.large,
                       ),
                       AppSizedBoxes.horizontalSmall,
-                      const Text(
-                        'Тут город',
-                        style: TextStyle(color: AppColors.whiteText),
+                      Text(
+                        _city,
+                        style: const TextStyle(color: AppColors.whiteText),
                       ),
                     ],
                   ),
@@ -74,24 +116,15 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     height: AppIconSizes.moonIconHeight,
                   ),
                   AppSizedBoxes.verticalMedium,
-                  const Text(
-                    'Ветренно',
-                    style: TextStyle(
-                        color: AppColors.whiteText,
-                        fontSize: AppSizes.fontExtraLarge),
-                  ),
-                  AppSizedBoxes.verticalMedium,
-                  const Text(
-                    '27°C',
-                    style: TextStyle(
+                  Text(
+                    '$_temperature°C', // Вывод температуры
+                    style: const TextStyle(
                         color: AppColors.whiteText,
                         fontSize: AppSizes.fontTitle),
                   ),
                   AppSizedBoxes.verticalLarge,
-                  const Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 20,
-                    ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -100,8 +133,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
                             WeatherParameterWidget(
                               iconInfo: AppImages.humidity,
                               label: "Влажность",
-                              value: '52%',
+                              value: '$_humidity%',
                             ),
+                            // Вывод влажности
                           ],
                         ),
                         Column(
@@ -109,8 +143,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
                             WeatherParameterWidget(
                               iconInfo: AppImages.wind,
                               label: "Ветер",
-                              value: '18 km/h',
+                              value: '$_windSpeed km/h',
                             ),
+                            // Вывод скорости ветра
                           ],
                         ),
                         Column(
@@ -118,7 +153,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                             WeatherParameterWidget(
                               iconInfo: AppImages.feelsLike,
                               label: "Ощущается",
-                              value: '22°',
+                              value: '$_feelsLike°C',
                             ),
                           ],
                         ),
@@ -178,7 +213,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                   ],
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),
