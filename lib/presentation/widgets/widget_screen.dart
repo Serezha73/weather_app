@@ -1,6 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:weather_app/presentation/theme/colors_app.dart';
 import 'package:weather_app/presentation/theme/sizes_app.dart';
+import 'package:weather_app/resources/resources.dart';
+
+String getLocalWeatherIcon(String weatherCode) {
+  switch (weatherCode) {
+    case '01d': // Ясное небо
+      return AppImages.clearDay;
+    case '01n': // Ясное небо ночь
+      return AppImages.clearNight;
+    case '02d': // Немного облаков
+      return AppImages.littleCloudDay;
+    case '02n':
+      return AppImages.littleCloudNight;
+    case '03d': // Рассеянные облака день
+      return AppImages.cloudsDayNight;
+    case '03n': // Рассеянные облака ночь
+      return AppImages.cloudsDayNight;
+    case '04d': // Облачность день
+      return AppImages.cloudsDayNight;
+    case '04n': // Облачность ночь
+      return AppImages.cloudsDayNight;
+    case '09d': // Мелкий дождь день
+      return AppImages.rain;
+    case '09n': // Мелкий дождь ночью
+      return AppImages.rainNight;
+    case '10d': // Дождь днем
+      return AppImages.rain;
+    case '10n': // Дождь ночью
+      return AppImages.rainNight;
+    case '11d': // Гроза
+      return AppImages.thunderstorm;
+    case '11n': // Гроза ночью
+      return AppImages.thunderstorm;
+    case '13d': // Снег
+      return AppImages.snow;
+    case '13n': // Снег ночь
+      return AppImages.snowNight;
+    default:
+      return AppImages.moonCloud; // Если нет соответствия, то дефолтная иконка
+  }
+}
 
 class WeatherParameterWidget extends StatelessWidget {
   final String iconInfo;
@@ -47,14 +87,14 @@ class WeatherParameterWidget extends StatelessWidget {
 class WeatherDayWidget extends StatelessWidget {
   final String day;
   final String temperature;
-  final String iconPath;
+  final String weatherCode;
   final String windSpeed;
 
   const WeatherDayWidget({
     Key? key,
     required this.day,
     required this.temperature,
-    required this.iconPath,
+    required this.weatherCode,
     required this.windSpeed,
   }) : super(key: key);
 
@@ -75,7 +115,7 @@ class WeatherDayWidget extends StatelessWidget {
           ),
           const SizedBox(height: 5),
           Image.asset(
-            iconPath,
+            getLocalWeatherIcon(weatherCode),
             width: 40,
             height: 40,
           ),
@@ -93,7 +133,7 @@ class WeatherDayWidget extends StatelessWidget {
             windSpeed,
             style: const TextStyle(
               color: Colors.white70,
-              fontSize: 14,
+              fontSize: 15,
             ),
           ),
         ],
