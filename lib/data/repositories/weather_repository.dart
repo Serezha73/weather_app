@@ -20,8 +20,7 @@ class WeatherRepository {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return WeatherData.fromJson(
-          data); // Возвращаем объект WeatherData с иконкой
+      return WeatherData.fromJson(data);
     } else {
       throw Exception('Ошибка загрузки данных: ${response.statusCode}');
     }
@@ -47,8 +46,7 @@ class WeatherRepository {
       // Берем прогноз каждые 24 часа (8 временных меток по 3 часа на день)
       for (int i = 0; i < forecasts.length; i += 8) {
         final forecast = forecasts[i];
-        weatherData
-            .add(FiveDayForecast.fromJson(forecast)); // Используем модель
+        weatherData.add(FiveDayForecast.fromJson(forecast));
       }
       return weatherData;
     } else {

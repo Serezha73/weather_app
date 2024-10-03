@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
         primaryColor: AppColors.primary,
         scaffoldBackgroundColor: AppColors.background,
       ),
-      home: WeatherScreen(),
+      home: const WeatherScreen(),
     );
   }
 }

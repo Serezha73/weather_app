@@ -11,11 +11,13 @@ class AppSizes {
 
 class AppSizedBoxes {
   // Отступы по вертикали
+  static const SizedBox verticalMini = SizedBox(height: 5.0);
   static const SizedBox verticalSmall = SizedBox(height: 8.0);
   static const SizedBox verticalMedium = SizedBox(height: 16.0);
   static const SizedBox verticalLarge = SizedBox(height: 32.0);
 
   // Отступы по горизонтали
+  static const SizedBox horizontaMini = SizedBox(width: 5.0);
   static const SizedBox horizontalSmall = SizedBox(width: 8.0);
   static const SizedBox horizontalMedium = SizedBox(width: 16.0);
   static const SizedBox horizontalLarge = SizedBox(width: 32.0);

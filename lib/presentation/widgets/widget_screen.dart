@@ -63,7 +63,7 @@ class WeatherParameterWidget extends StatelessWidget {
           width: AppIconSizes.large,
           height: AppIconSizes.large,
         ),
-        const SizedBox(height: 4),
+        AppSizedBoxes.verticalMini,
         Text(
           label,
           style: const TextStyle(
@@ -71,7 +71,7 @@ class WeatherParameterWidget extends StatelessWidget {
             fontSize: AppSizes.fontSmall,
           ),
         ),
-        const SizedBox(height: 4),
+        AppSizedBoxes.verticalMini,
         Text(
           value,
           style: const TextStyle(
@@ -108,32 +108,32 @@ class WeatherDayWidget extends StatelessWidget {
           Text(
             day,
             style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
+              color: AppColors.whiteText,
+              fontSize: AppSizes.fontMedium,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 5),
+          AppSizedBoxes.verticalMini,
           Image.asset(
             getLocalWeatherIcon(weatherCode),
             width: 40,
             height: 40,
           ),
-          const SizedBox(height: 5),
+          AppSizedBoxes.verticalMini,
           Text(
             temperature,
             style: const TextStyle(
-              color: Colors.white,
-              fontSize: 22,
+              color: AppColors.whiteText,
+              fontSize: AppSizes.fontExtraLarge,
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 5),
+          AppSizedBoxes.verticalMini,
           Text(
             windSpeed,
             style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 15,
+              color: AppColors.whiteText,
+              fontSize: AppSizes.fontMedium,
             ),
           ),
         ],
