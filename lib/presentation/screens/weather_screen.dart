@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:weather_app/data/repositories/location_repository.dart';
 import 'package:weather_app/data/models/five_day_forecast.dart';
-import 'package:weather_app/data/repositories/weather_repository.dart';
 import 'package:weather_app/domian/usecases/load_weather_usecase.dart';
 import 'package:weather_app/domian/usecases/save_weather_usecase.dart';
+import 'package:weather_app/domian/usecases/get_location_usecase.dart';
+import 'package:weather_app/domian/usecases/get_weather_usecase.dart';
 import 'package:weather_app/presentation/widgets/widget_screen.dart';
 import 'package:weather_app/resources/resources.dart';
 import 'package:weather_app/presentation/theme/colors_app.dart';
@@ -14,21 +14,22 @@ import 'package:weather_app/presentation/theme/sizes_app.dart';
 class WeatherScreen extends StatefulWidget {
   final SaveWeatherUseCase saveWeatherUseCase;
   final LoadWeatherUseCase loadWeatherUseCase;
+  final GetLocationUseCase getLocationUseCase;
+  final GetWeatherUseCase getWeatherUseCase;
 
   const WeatherScreen({
-    super.key,
+    Key? key,
     required this.saveWeatherUseCase,
     required this.loadWeatherUseCase,
-  });
+    required this.getLocationUseCase,
+    required this.getWeatherUseCase,
+  }) : super(key: key);
 
   @override
   State<WeatherScreen> createState() => _WeatherScreenState();
 }
 
 class _WeatherScreenState extends State<WeatherScreen> {
-  final LocationRepository _locationRepository = LocationRepository();
-  final WeatherRepository _weatherRepository = WeatherRepository();
-
   String _city = "Загрузка...";
   double _temperature = 0.0;
   int _humidity = 0;
@@ -50,7 +51,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
     await _loadLocationAndWeather();
   }
 
-  // загрузка данных через UseCase
   Future<void> _loadPreferences() async {
     final data = await widget.loadWeatherUseCase.loadWeather();
     if (data != null) {
@@ -79,24 +79,20 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
   Future<void> _loadLocationAndWeather() async {
     try {
-      final position = await _locationRepository.getCurrentPosition();
-      final city = await _locationRepository.getCityFromPosition(position);
-      final weatherData = await _weatherRepository.fetchWeatherData(city);
-      final forecastData =
-          await _weatherRepository.fetchFiveDayWeatherData(city);
+      final city = await widget.getLocationUseCase.getLocation();
+      final weatherDataMap = await widget.getWeatherUseCase.getWeather(city);
 
       setState(() {
         _city = city;
-        _temperature = weatherData.temperature;
-        _humidity = weatherData.humidity;
-        _windSpeed = weatherData.windSpeed;
-        _feelsLike = weatherData.feelsLike;
-        _weatherCode = weatherData.icon;
-        _fiveDayForecast = forecastData;
+        _temperature = weatherDataMap['weatherData'].temperature;
+        _humidity = weatherDataMap['weatherData'].humidity;
+        _windSpeed = weatherDataMap['weatherData'].windSpeed;
+        _feelsLike = weatherDataMap['weatherData'].feelsLike;
+        _weatherCode = weatherDataMap['weatherData'].icon;
+        _fiveDayForecast = weatherDataMap['forecastData'];
         _isLoading = false;
       });
 
-      // Сохранение данных после получения
       await _savePreferences();
     } catch (e) {
       print(e);
