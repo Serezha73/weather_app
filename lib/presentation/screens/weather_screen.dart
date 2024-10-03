@@ -25,6 +25,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
   int _humidity = 0;
   double _windSpeed = 0.0;
   double _feelsLike = 0.0;
+  String _weatherCode = "";
   List<FiveDayForecast> _fiveDayForecast = [];
   bool _isLoading = true;
 
@@ -56,6 +57,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
         _humidity = weatherData.humidity;
         _windSpeed = weatherData.windSpeed;
         _feelsLike = weatherData.feelsLike;
+        _weatherCode = weatherData.icon;
         _fiveDayForecast = forecastData;
         _isLoading = false;
       });
@@ -125,7 +127,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                         ),
                         AppSizedBoxes.verticalLarge,
                         Image.asset(
-                          AppImages.moonCloud,
+                          getLocalWeatherIcon(_weatherCode),
                           width: AppIconSizes.moonIconWidth,
                           height: AppIconSizes.moonIconHeight,
                         ),
@@ -195,7 +197,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
   Widget _buildFiveDayForecast() {
     if (_fiveDayForecast.isEmpty) {
       return const Center(
-        child: CircularProgressIndicator(),
+        child: CircularProgressIndicator(
+          color: AppColors.colorIndicator,
+        ),
       );
     }
 
