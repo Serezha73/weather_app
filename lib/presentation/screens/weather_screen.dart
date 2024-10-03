@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:weather_app/data/repositories/location_repository.dart';
 import 'package:weather_app/data/models/five_day_forecast.dart';
 import 'package:weather_app/data/repositories/weather_repository.dart';
+import 'package:weather_app/domian/usecases/load_weather_usecase.dart';
+import 'package:weather_app/domian/usecases/save_weather_usecase.dart';
 import 'package:weather_app/presentation/widgets/widget_screen.dart';
 import 'package:weather_app/resources/resources.dart';
 import 'package:weather_app/presentation/theme/colors_app.dart';
 import 'package:weather_app/presentation/theme/sizes_app.dart';
 
 class WeatherScreen extends StatefulWidget {
-  const WeatherScreen({super.key});
+  final SaveWeatherUseCase saveWeatherUseCase;
+  final LoadWeatherUseCase loadWeatherUseCase;
+
+  const WeatherScreen({
+    super.key,
+    required this.saveWeatherUseCase,
+    required this.loadWeatherUseCase,
+  });
 
   @override
   State<WeatherScreen> createState() => _WeatherScreenState();
@@ -42,28 +50,31 @@ class _WeatherScreenState extends State<WeatherScreen> {
     await _loadLocationAndWeather();
   }
 
-  // загрузка данных из SharedPreferences
+  // загрузка данных через UseCase
   Future<void> _loadPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _city = prefs.getString('city') ?? "Загрузка...";
-      _temperature = prefs.getDouble('temperature') ?? 0.0;
-      _humidity = prefs.getInt('humidity') ?? 0;
-      _windSpeed = prefs.getDouble('windSpeed') ?? 0.0;
-      _feelsLike = prefs.getDouble('feelsLike') ?? 0.0;
-      _weatherCode = prefs.getString('weatherCode') ?? "";
-    });
+    final data = await widget.loadWeatherUseCase.loadWeather();
+    if (data != null) {
+      setState(() {
+        _city = data['city'] ?? "Загрузка...";
+        _temperature = data['temperature'] ?? 0.0;
+        _humidity = data['humidity'] ?? 0;
+        _windSpeed = data['windSpeed'] ?? 0.0;
+        _feelsLike = data['feelsLike'] ?? 0.0;
+        _weatherCode = data['icon'] ?? "";
+      });
+    }
   }
 
-  // сохранение данных в SharedPreferences
   Future<void> _savePreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString('city', _city);
-    prefs.setDouble('temperature', _temperature);
-    prefs.setInt('humidity', _humidity);
-    prefs.setDouble('windSpeed', _windSpeed);
-    prefs.setDouble('feelsLike', _feelsLike);
-    prefs.setString('weatherCode', _weatherCode);
+    final data = {
+      'city': _city,
+      'temperature': _temperature,
+      'humidity': _humidity,
+      'windSpeed': _windSpeed,
+      'feelsLike': _feelsLike,
+      'icon': _weatherCode,
+    };
+    await widget.saveWeatherUseCase.saveWeather(data);
   }
 
   Future<void> _loadLocationAndWeather() async {
@@ -85,7 +96,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
         _isLoading = false;
       });
 
-      _savePreferences(); // сохранение данных после их получения
+      // Сохранение данных после получения
+      await _savePreferences();
     } catch (e) {
       print(e);
       setState(() {
