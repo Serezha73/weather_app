@@ -20,7 +20,8 @@ class WeatherRepository {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return WeatherData.fromJson(data); // Возвращаем объект WeatherData
+      return WeatherData.fromJson(
+          data); // Возвращаем объект WeatherData с иконкой
     } else {
       throw Exception('Ошибка загрузки данных: ${response.statusCode}');
     }
