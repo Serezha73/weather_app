@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:weather_app/data/repositories/location_repository.dart';
 import 'package:weather_app/data/models/five_day_forecast.dart';
 import 'package:weather_app/data/repositories/weather_repository.dart';
@@ -32,15 +33,37 @@ class _WeatherScreenState extends State<WeatherScreen> {
   @override
   void initState() {
     super.initState();
+    _loadPreferences();
     _initializeDateFormattingAndLoadWeather();
   }
 
   Future<void> _initializeDateFormattingAndLoadWeather() async {
-    // Инициализация локализации для даты
     await initializeDateFormatting('ru', null);
-
-    // Загрузка данных после инициализации локалей
     await _loadLocationAndWeather();
+  }
+
+  // загрузка данных из SharedPreferences
+  Future<void> _loadPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _city = prefs.getString('city') ?? "Загрузка...";
+      _temperature = prefs.getDouble('temperature') ?? 0.0;
+      _humidity = prefs.getInt('humidity') ?? 0;
+      _windSpeed = prefs.getDouble('windSpeed') ?? 0.0;
+      _feelsLike = prefs.getDouble('feelsLike') ?? 0.0;
+      _weatherCode = prefs.getString('weatherCode') ?? "";
+    });
+  }
+
+  // сохранение данных в SharedPreferences
+  Future<void> _savePreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('city', _city);
+    prefs.setDouble('temperature', _temperature);
+    prefs.setInt('humidity', _humidity);
+    prefs.setDouble('windSpeed', _windSpeed);
+    prefs.setDouble('feelsLike', _feelsLike);
+    prefs.setString('weatherCode', _weatherCode);
   }
 
   Future<void> _loadLocationAndWeather() async {
@@ -61,6 +84,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
         _fiveDayForecast = forecastData;
         _isLoading = false;
       });
+
+      _savePreferences(); // сохранение данных после их получения
     } catch (e) {
       print(e);
       setState(() {
@@ -158,7 +183,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                   WeatherParameterWidget(
                                     iconInfo: AppImages.wind,
                                     label: "Ветер",
-                                    value: '$_windSpeed km/h',
+                                    value: '${_windSpeed.toInt()} km/h',
                                   ),
                                 ],
                               ),
@@ -197,9 +222,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
   Widget _buildFiveDayForecast() {
     if (_fiveDayForecast.isEmpty) {
       return const Center(
-        child: CircularProgressIndicator(
-          color: AppColors.colorIndicator,
-        ),
+        child: CircularProgressIndicator(),
       );
     }
 
@@ -212,7 +235,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
           day: forecast.date.split(' ')[0],
           temperature: '${forecast.temperature.toInt()}°C',
           weatherCode: forecast.icon,
-          windSpeed: '${forecast.windSpeed} km/h',
+          windSpeed: '${forecast.windSpeed.toInt()} km/h',
         );
       },
     );
